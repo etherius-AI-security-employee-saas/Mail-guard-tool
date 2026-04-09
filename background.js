@@ -11,7 +11,9 @@ const ETHERIUS_API = "https://etherius-api.vercel.app/api/scan";
 const API_TIMEOUT_MS = 4800;
 const HISTORY_LIMIT = 25;
 const SCAN_CACHE_TTL_MS = 4 * 60 * 1000;
+const DOMAIN_INTEL_TIMEOUT_MS = 2200;
 const scanCache = new Map();
+const domainIntelCache = new Map();
 const TRUSTED_DOMAINS = [
   "google.com",
   "microsoft.com",
@@ -103,8 +105,11 @@ async function analyzeEmail(emailData) {
   }
 
   const settings = await getSettings();
+  const domainIntel = sanitized.senderDomain
+    ? await fetchDomainIntel(sanitized.senderDomain)
+    : null;
   const localResult = settings.localAiEnabled !== false
-    ? runLocalDecisionEngine(sanitized, settings.protectionMode)
+    ? runLocalDecisionEngine(sanitized, settings.protectionMode, domainIntel)
     : defaultLocalResult();
 
   let cloudResult = null;
@@ -261,7 +266,7 @@ function defaultLocalResult() {
   };
 }
 
-function runLocalDecisionEngine(emailData, protectionMode) {
+function runLocalDecisionEngine(emailData, protectionMode, domainIntel) {
   const subject = `${emailData.subject} ${emailData.senderName}`.toLowerCase();
   const body = emailData.body.toLowerCase();
   const sender = emailData.sender.toLowerCase();
@@ -290,7 +295,7 @@ function runLocalDecisionEngine(emailData, protectionMode) {
     {
       name: "payment pressure",
       weight: 22,
-      test: /(pay|payment|processing fee|registration fee|security deposit|advance fee|wire transfer|upi|bank account)/i,
+      test: /(\bpay\b|make payment|payment required|submit fee|send money|processing fee|registration fee|security deposit|advance fee|wire transfer|upi id|bank account details|complete payment)/i,
       detail: "Payment or fee pressure detected"
     },
     {
@@ -388,6 +393,11 @@ function runLocalDecisionEngine(emailData, protectionMode) {
     flags.push({ type: "brand-spoof", detail: "Known brand referenced from untrusted domain", weight: 14 });
   }
 
+  const salaryContextSignal = analyzeSalaryContext(`${subject} ${body}`);
+  score += salaryContextSignal.score;
+  reasons.push(...salaryContextSignal.reasons);
+  flags.push(...salaryContextSignal.flags);
+
   const freeMailSignal = analyzeFreeMailRecruiterRisk(sender, senderNameOrFallback(emailData.senderName, sender), `${subject} ${body}`);
   score += freeMailSignal.score;
   reasons.push(...freeMailSignal.reasons);
@@ -405,6 +415,11 @@ function runLocalDecisionEngine(emailData, protectionMode) {
   score += companyImpersonationSignal.score;
   reasons.push(...companyImpersonationSignal.reasons);
   flags.push(...companyImpersonationSignal.flags);
+
+  const domainIntelSignal = analyzeDomainIntel(domainIntel, `${subject} ${body}`, senderDomain);
+  score += domainIntelSignal.score;
+  reasons.push(...domainIntelSignal.reasons);
+  flags.push(...domainIntelSignal.flags);
 
   const normalizedScore = clamp(adjustForMode(score, protectionMode), 0, 100);
   const riskLevel = scoreToRiskLevel(normalizedScore);
@@ -461,6 +476,22 @@ function analyzeUrls(urls, senderDomain) {
       flags.push({ type: "redirect-link", detail: "Shortened or obfuscated link was found", weight: 10 });
     }
   });
+
+  return { score, reasons, flags };
+}
+
+function analyzeSalaryContext(combinedText) {
+  const reasons = [];
+  const flags = [];
+  let score = 0;
+  const looksLikeCompensation = /(salary package|salary offered|ctc|compensation package|annual package|annual salary|stipend|lpa|per annum|monthly salary|benefits package)/i.test(combinedText);
+  const looksLikeRecipientPayment = /(pay now|make payment|submit fee|registration fee|processing fee|deposit amount|send money|pay the fee|purchase course|buy the course)/i.test(combinedText);
+
+  if (looksLikeCompensation && !looksLikeRecipientPayment) {
+    score -= 18;
+    reasons.push("Compensation context detected; money language appears to describe salary or benefits, not a payment demand");
+    flags.push({ type: "salary-context", detail: "Salary or package wording reduced scam risk", weight: -18 });
+  }
 
   return { score, reasons, flags };
 }
@@ -532,6 +563,31 @@ function analyzeCompanyImpersonation(senderName, senderDomain, combinedText) {
   return { score, reasons, flags };
 }
 
+function analyzeDomainIntel(domainIntel, combinedText, senderDomain) {
+  const reasons = [];
+  const flags = [];
+  let score = 0;
+
+  if (!domainIntel || !domainIntel.available || !senderDomain) {
+    return { score, reasons, flags };
+  }
+
+  const suspiciousContext = /(internship|job offer|recruit|payment|fee|verify|login|urgent|hr|training)/i.test(combinedText);
+  if (domainIntel.ageDays > -1 && domainIntel.ageDays <= 120 && suspiciousContext) {
+    score += 12;
+    reasons.push(`Sender domain is very new (${domainIntel.ageDays} days old) for the type of request being made`);
+    flags.push({ type: "new-domain", detail: `Sender domain ${senderDomain} appears newly registered`, weight: 12 });
+  }
+
+  if (domainIntel.ageDays >= 3650 && !looksSuspiciousDomain(senderDomain)) {
+    score -= 6;
+    reasons.push(`Sender domain shows mature registration age (${Math.floor(domainIntel.ageDays / 365)}+ years), which slightly reduces risk`);
+    flags.push({ type: "mature-domain", detail: "Long-lived sender domain reduced risk slightly", weight: -6 });
+  }
+
+  return { score, reasons, flags };
+}
+
 function extractClaimedBrands(text) {
   const lookup = [
     { label: "Google", domainHint: "google" },
@@ -550,6 +606,45 @@ function extractClaimedBrands(text) {
 
 function senderNameOrFallback(senderName, sender) {
   return String(senderName || sender || "").trim();
+}
+
+async function fetchDomainIntel(domain) {
+  if (!domain) {
+    return null;
+  }
+
+  const cached = domainIntelCache.get(domain);
+  if (cached && (Date.now() - cached.createdAt) < 24 * 60 * 60 * 1000) {
+    return cached.value;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), DOMAIN_INTEL_TIMEOUT_MS);
+  try {
+    const response = await fetch(`https://rdap.org/domain/${encodeURIComponent(domain)}`, {
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const payload = await response.json();
+    const events = Array.isArray(payload.events) ? payload.events : [];
+    const registrationEvent = events.find((event) => /registration/i.test(String(event.eventAction || "")));
+    const registeredAt = registrationEvent?.eventDate ? new Date(registrationEvent.eventDate) : null;
+    const ageDays = registeredAt && !Number.isNaN(registeredAt.getTime())
+      ? Math.max(0, Math.floor((Date.now() - registeredAt.getTime()) / (1000 * 60 * 60 * 24)))
+      : -1;
+    const result = {
+      available: true,
+      ageDays
+    };
+    domainIntelCache.set(domain, { createdAt: Date.now(), value: result });
+    return result;
+  } catch (_error) {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 function looksSuspiciousDomain(domain) {

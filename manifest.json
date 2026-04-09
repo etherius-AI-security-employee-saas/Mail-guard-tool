@@ -13,7 +13,8 @@
   "host_permissions": [
     "https://mail.google.com/*",
     "https://outlook.live.com/*",
-    "https://outlook.office.com/*"
+    "https://outlook.office.com/*",
+    "https://rdap.org/*"
   ],
   "background": {
     "service_worker": "background.js"

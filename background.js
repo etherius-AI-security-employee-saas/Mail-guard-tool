@@ -10,6 +10,8 @@ const DEFAULT_SETTINGS = {
 const ETHERIUS_API = "https://etherius-api.vercel.app/api/scan";
 const API_TIMEOUT_MS = 4800;
 const HISTORY_LIMIT = 25;
+const SCAN_CACHE_TTL_MS = 4 * 60 * 1000;
+const scanCache = new Map();
 const TRUSTED_DOMAINS = [
   "google.com",
   "microsoft.com",
@@ -89,6 +91,17 @@ async function analyzeEmail(emailData) {
     throw new Error("Open an email first, then run EmailGuard.");
   }
 
+  const cacheKey = buildCacheKey(sanitized);
+  const cached = scanCache.get(cacheKey);
+  if (cached && (Date.now() - cached.createdAt) < SCAN_CACHE_TTL_MS) {
+    await saveToHistory(sanitized, cached.result);
+    await incrementScanCount();
+    return {
+      ...cached.result,
+      engineStatus: `${cached.result.engineStatus || "hybrid-ai"} / cached`
+    };
+  }
+
   const settings = await getSettings();
   const localResult = settings.localAiEnabled !== false
     ? runLocalDecisionEngine(sanitized, settings.protectionMode)
@@ -103,6 +116,7 @@ async function analyzeEmail(emailData) {
   }
 
   const finalResult = combineDecisionEngines(localResult, cloudResult, settings.protectionMode, cloudFailureReason);
+  scanCache.set(cacheKey, { createdAt: Date.now(), result: finalResult });
   await saveToHistory(sanitized, finalResult);
   await incrementScanCount();
   return finalResult;
@@ -296,6 +310,24 @@ function runLocalDecisionEngine(emailData, protectionMode) {
       weight: 18,
       test: /(confidential|do not tell|keep this secret|share otp|verification code|one-time password|otp)/i,
       detail: "Secrecy or OTP abuse pattern detected"
+    },
+    {
+      name: "course selling lure",
+      weight: 24,
+      test: /(course fee|enroll now|training program|certification required|pay for training|buy the course|program fee|mandatory course|bootcamp fee|learning package)/i,
+      detail: "Course-selling or paid training language detected"
+    },
+    {
+      name: "chat migration",
+      weight: 18,
+      test: /(whatsapp|telegram|signal app|move to chat|contact on whatsapp|text the recruiter)/i,
+      detail: "Conversation is being pushed to untrusted chat channels"
+    },
+    {
+      name: "financial collection",
+      weight: 22,
+      test: /(refundable deposit|security deposit|assessment fee|exam fee|processing charge|document verification fee|onboarding payment|pay to continue)/i,
+      detail: "Financial collection language tied to progression detected"
     }
   ];
 
@@ -356,6 +388,24 @@ function runLocalDecisionEngine(emailData, protectionMode) {
     flags.push({ type: "brand-spoof", detail: "Known brand referenced from untrusted domain", weight: 14 });
   }
 
+  const freeMailSignal = analyzeFreeMailRecruiterRisk(sender, senderNameOrFallback(emailData.senderName, sender), `${subject} ${body}`);
+  score += freeMailSignal.score;
+  reasons.push(...freeMailSignal.reasons);
+  flags.push(...freeMailSignal.flags);
+
+  const internshipFeeSignal = analyzeInternshipFeeRisk(`${subject} ${body}`);
+  score += internshipFeeSignal.score;
+  reasons.push(...internshipFeeSignal.reasons);
+  flags.push(...internshipFeeSignal.flags);
+  if (internshipFeeSignal.isInternshipScam) {
+    isInternshipScam = true;
+  }
+
+  const companyImpersonationSignal = analyzeCompanyImpersonation(emailData.senderName, senderDomain, `${subject} ${body}`);
+  score += companyImpersonationSignal.score;
+  reasons.push(...companyImpersonationSignal.reasons);
+  flags.push(...companyImpersonationSignal.flags);
+
   const normalizedScore = clamp(adjustForMode(score, protectionMode), 0, 100);
   const riskLevel = scoreToRiskLevel(normalizedScore);
   const summary = buildSummary(riskLevel, normalizedScore, isInternshipScam, reasons);
@@ -413,6 +463,93 @@ function analyzeUrls(urls, senderDomain) {
   });
 
   return { score, reasons, flags };
+}
+
+function analyzeFreeMailRecruiterRisk(sender, senderName, combinedText) {
+  const reasons = [];
+  const flags = [];
+  let score = 0;
+  const freeMailPattern = /@(gmail\.com|outlook\.com|hotmail\.com|yahoo\.com|proton\.me|protonmail\.com|aol\.com|icloud\.com)$/i;
+  const hrPattern = /(hr|human resources|recruiter|talent acquisition|hiring team|placement cell|campus recruitment)/i;
+  const senderLooksFree = freeMailPattern.test(sender);
+  const senderLooksHr = hrPattern.test(`${senderName} ${combinedText}`);
+
+  if (senderLooksFree && senderLooksHr) {
+    score += 20;
+    reasons.push("Recruitment language is coming from a free webmail sender");
+    flags.push({ type: "free-mail-recruiter", detail: "Recruiter-style sender is using free webmail instead of a company domain", weight: 20 });
+  }
+
+  return { score, reasons, flags };
+}
+
+function analyzeInternshipFeeRisk(combinedText) {
+  const reasons = [];
+  const flags = [];
+  let score = 0;
+  const hasOpportunity = /(internship|intern|job offer|offer letter|hiring|selection|campus drive|placement|training opportunity)/i.test(combinedText);
+  const hasFee = /(fee|payment|deposit|course|training fee|registration fee|security deposit|processing charge|assessment fee|exam fee|pay now|purchase)/i.test(combinedText);
+  const hasProofPressure = /(limited seats|confirm immediately|complete payment|slot booking|reserve your seat|only today|deadline today)/i.test(combinedText);
+
+  if (hasOpportunity && hasFee) {
+    score += 28;
+    reasons.push("Opportunity or internship language is combined with a money request");
+    flags.push({ type: "opportunity-fee", detail: "Job or internship flow appears tied to payment or course purchase", weight: 28 });
+  }
+
+  if (hasOpportunity && hasFee && hasProofPressure) {
+    score += 14;
+    reasons.push("Urgent payment pressure is attached to the opportunity flow");
+    flags.push({ type: "urgent-opportunity-fee", detail: "Payment request is being accelerated with deadline pressure", weight: 14 });
+  }
+
+  return {
+    score,
+    reasons,
+    flags,
+    isInternshipScam: hasOpportunity && hasFee
+  };
+}
+
+function analyzeCompanyImpersonation(senderName, senderDomain, combinedText) {
+  const reasons = [];
+  const flags = [];
+  let score = 0;
+  const claimedBrands = extractClaimedBrands(`${senderName} ${combinedText}`);
+  if (!claimedBrands.length) {
+    return { score, reasons, flags };
+  }
+
+  for (const brand of claimedBrands) {
+    if (!senderDomain || !senderDomain.includes(brand.domainHint)) {
+      score += 12;
+      reasons.push(`${brand.label} is referenced without a matching sender domain`);
+      flags.push({ type: "company-claim-mismatch", detail: `${brand.label} is mentioned but sender domain does not match`, weight: 12 });
+      break;
+    }
+  }
+
+  return { score, reasons, flags };
+}
+
+function extractClaimedBrands(text) {
+  const lookup = [
+    { label: "Google", domainHint: "google" },
+    { label: "Microsoft", domainHint: "microsoft" },
+    { label: "Amazon", domainHint: "amazon" },
+    { label: "LinkedIn", domainHint: "linkedin" },
+    { label: "Infosys", domainHint: "infosys" },
+    { label: "TCS", domainHint: "tcs" },
+    { label: "Wipro", domainHint: "wipro" },
+    { label: "Accenture", domainHint: "accenture" },
+    { label: "Deloitte", domainHint: "deloitte" }
+  ];
+  const lower = String(text || "").toLowerCase();
+  return lookup.filter((brand) => lower.includes(brand.label.toLowerCase()));
+}
+
+function senderNameOrFallback(senderName, sender) {
+  return String(senderName || sender || "").trim();
 }
 
 function looksSuspiciousDomain(domain) {
@@ -538,6 +675,16 @@ function combineDecisionEngines(localResult, cloudResult, protectionMode, cloudF
     isInternshipScam,
     remainingScans: cloudResult.remainingScans
   };
+}
+
+function buildCacheKey(sanitized) {
+  return [
+    sanitized.sender,
+    sanitized.subject,
+    sanitized.replyTo,
+    sanitized.body.slice(0, 400),
+    sanitized.urls.slice(0, 5).join("|")
+  ].join("::");
 }
 
 function choosePreferredSummary(localResult, cloudResult, riskLevel, score, isInternshipScam) {

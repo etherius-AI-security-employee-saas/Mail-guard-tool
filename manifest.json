@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Etherius EmailGuard",
-  "version": "2.1.0",
-  "description": "Enterprise-grade email fraud detection for Gmail and Outlook with hybrid AI, phishing heuristics, internship scam detection, and deep sender-risk analysis.",
+  "version": "2.2.0",
+  "description": "Enterprise-grade email fraud detection for Gmail and Outlook with hybrid AI, fee-based internship scam detection, fake recruiter analysis, and deep sender-risk scoring.",
   "minimum_chrome_version": "114",
   "permissions": [
     "activeTab",

@@ -6,17 +6,18 @@
   <title>Etherius EmailGuard</title>
   <style>
     :root {
-      --bg: #030711;
-      --panel: rgba(10, 18, 33, 0.9);
-      --panel-2: rgba(13, 24, 44, 0.88);
-      --border: rgba(110, 182, 255, 0.18);
-      --text: #e9f1fb;
-      --muted: #8ca4c4;
-      --accent: #007dff;
-      --accent-2: #00d3ff;
-      --safe: #22c55e;
-      --warn: #f59e0b;
-      --danger: #ef4444;
+      --bg: #03060c;
+      --panel: rgba(9, 16, 29, 0.9);
+      --panel-2: rgba(12, 22, 39, 0.92);
+      --line: rgba(119, 190, 255, 0.18);
+      --line-strong: rgba(155, 221, 255, 0.3);
+      --text: #edf5ff;
+      --muted: #90a9c8;
+      --blue: #007cff;
+      --cyan: #00d4ff;
+      --mint: #29e3b4;
+      --gold: #ffba52;
+      --red: #ff6b7f;
       --mono: "Consolas", "SFMono-Regular", monospace;
       --sans: "Segoe UI", "Inter", sans-serif;
     }
@@ -24,14 +25,14 @@
     * { box-sizing: border-box; }
 
     body {
-      width: 394px;
+      width: 404px;
       margin: 0;
       color: var(--text);
       font-family: var(--sans);
       background:
-        radial-gradient(circle at top left, rgba(0, 125, 255, 0.2), transparent 34%),
-        radial-gradient(circle at top right, rgba(0, 211, 255, 0.14), transparent 28%),
-        linear-gradient(180deg, #050914 0%, var(--bg) 100%);
+        radial-gradient(circle at top left, rgba(0, 124, 255, 0.22), transparent 32%),
+        radial-gradient(circle at 88% 8%, rgba(0, 212, 255, 0.18), transparent 28%),
+        linear-gradient(180deg, #050913 0%, var(--bg) 100%);
     }
 
     body::before {
@@ -39,11 +40,11 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      opacity: 0.18;
+      opacity: 0.16;
       background-image:
-        linear-gradient(rgba(154, 197, 255, 0.12) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(154, 197, 255, 0.09) 1px, transparent 1px);
-      background-size: 32px 32px;
+        linear-gradient(rgba(151, 199, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(151, 199, 255, 0.08) 1px, transparent 1px);
+      background-size: 34px 34px;
     }
 
     .shell {
@@ -51,181 +52,221 @@
       padding: 16px;
     }
 
-    .header,
-    .card,
-    .stat {
-      backdrop-filter: blur(14px);
+    .header-shell {
+      position: relative;
+      margin-bottom: 14px;
+      padding: 1px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(0, 124, 255, 0.45), rgba(0, 212, 255, 0.22), rgba(41, 227, 180, 0.18));
+      box-shadow: 0 26px 66px rgba(0, 0, 0, 0.34);
     }
 
     .header {
       position: relative;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(15, 25, 46, 0.96), rgba(7, 12, 23, 0.96));
-      box-shadow: 0 22px 52px rgba(0, 0, 0, 0.3);
       overflow: hidden;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 18px;
+      border-radius: 27px;
+      background:
+        radial-gradient(circle at 80% -10%, rgba(0, 212, 255, 0.12), transparent 22%),
+        linear-gradient(180deg, rgba(13, 24, 44, 0.98), rgba(6, 12, 24, 0.98));
     }
 
     .header::after {
       content: "";
       position: absolute;
-      width: 160px;
-      height: 160px;
-      right: -50px;
-      top: -70px;
+      width: 170px;
+      height: 170px;
+      right: -45px;
+      top: -85px;
       border-radius: 50%;
-      background: rgba(0, 211, 255, 0.12);
-      filter: blur(18px);
+      background: rgba(0, 212, 255, 0.14);
+      filter: blur(20px);
     }
 
     .logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(0, 125, 255, 0.22), rgba(0, 211, 255, 0.22));
-      border: 1px solid rgba(164, 224, 255, 0.24);
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
       display: grid;
       place-items: center;
-      overflow: hidden;
-      flex: 0 0 auto;
-      box-shadow: 0 0 24px rgba(0, 211, 255, 0.14);
+      background: linear-gradient(135deg, rgba(0, 124, 255, 0.2), rgba(0, 212, 255, 0.22));
+      border: 1px solid rgba(169, 227, 255, 0.28);
+      box-shadow: 0 0 26px rgba(0, 212, 255, 0.12);
     }
 
     .logo img {
-      width: 26px;
-      height: 26px;
+      width: 30px;
+      height: 30px;
       display: block;
     }
 
     .eyebrow {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
       color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
     }
 
     .title {
-      font-size: 19px;
+      margin-top: 4px;
+      font-size: 20px;
       font-weight: 700;
-      color: #f7fbff;
-      margin-top: 2px;
+      letter-spacing: -0.02em;
     }
 
     .subtitle {
       margin-top: 4px;
       font-size: 12px;
-      color: #a9b8cf;
+      color: #aac1dd;
+      line-height: 1.45;
     }
 
     .status {
-      margin-left: auto;
-      padding: 7px 11px;
+      position: relative;
+      z-index: 1;
+      padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(0, 211, 255, 0.2);
-      color: #baf7eb;
+      border: 1px solid rgba(162, 225, 255, 0.22);
+      background: rgba(6, 17, 32, 0.82);
+      color: #b7f3e5;
       font-size: 10px;
-      letter-spacing: 0.14em;
+      font-weight: 700;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      background: rgba(10, 27, 32, 0.42);
+      white-space: nowrap;
     }
 
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-top: 14px;
+      margin-bottom: 14px;
     }
 
     .stat {
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(11, 20, 37, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(11, 20, 37, 0.94), rgba(8, 13, 24, 0.94));
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
     }
 
     .label {
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
       color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
     }
 
     .value {
-      margin-top: 6px;
-      font-size: 22px;
+      margin-top: 8px;
+      font-size: 23px;
+      font-weight: 700;
       font-family: var(--mono);
-      color: #f7fbff;
     }
 
     .card {
+      position: relative;
+      overflow: hidden;
       margin-top: 14px;
-      padding: 15px;
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, var(--panel), rgba(8, 14, 27, 0.96));
+      padding: 16px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(11, 19, 35, 0.95), rgba(8, 13, 23, 0.96));
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 30%);
     }
 
     .section-title {
+      position: relative;
+      z-index: 1;
       margin: 0 0 12px;
-      font-size: 12px;
-      letter-spacing: 0.14em;
+      font-size: 11px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #a9b8cf;
+      color: #a7bfdc;
     }
 
-    button {
+    button,
+    select,
+    input {
       font: inherit;
-      cursor: pointer;
-      border: 0;
     }
 
     .scan-row {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
-      align-items: center;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
+    }
+
+    .primary,
+    .secondary {
+      border: 0;
+      cursor: pointer;
+      border-radius: 15px;
+      font-weight: 700;
     }
 
     .primary {
-      width: 100%;
-      padding: 13px 14px;
-      border-radius: 14px;
+      padding: 14px 16px;
       color: white;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: 0 16px 36px rgba(0, 111, 243, 0.28);
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      box-shadow: 0 18px 34px rgba(0, 124, 255, 0.28);
+    }
+
+    .secondary {
+      padding: 12px 14px;
+      color: #dce8fa;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .mode-pill {
+      display: grid;
+      place-items: center;
+      min-width: 96px;
       padding: 12px 13px;
-      border-radius: 14px;
+      border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.06);
       background: rgba(255, 255, 255, 0.04);
+      color: #d9ebff;
       font-size: 11px;
-      color: #d7e7fb;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      white-space: nowrap;
     }
 
     .hint {
-      margin-top: 10px;
-      font-size: 12px;
-      line-height: 1.55;
+      position: relative;
+      z-index: 1;
+      margin-top: 11px;
       color: var(--muted);
+      font-size: 12px;
+      line-height: 1.58;
     }
 
     .result {
       display: none;
-      margin-top: 12px;
+      position: relative;
+      z-index: 1;
+      margin-top: 14px;
       padding: 14px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.03);
+      border-radius: 18px;
       border: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
     }
 
     .result.show { display: block; }
@@ -241,23 +282,23 @@
     }
 
     .result-score {
-      font-family: var(--mono);
       color: var(--muted);
+      font-family: var(--mono);
     }
 
     .result-summary {
       margin: 10px 0 0;
+      color: var(--text);
       font-size: 13px;
       line-height: 1.58;
-      color: var(--text);
     }
 
     .verdict {
       margin-top: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      color: #c7d6ea;
+      padding: 11px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #d3e1f1;
       font-size: 12px;
       line-height: 1.5;
     }
@@ -269,13 +310,13 @@
     }
 
     .reason {
-      padding: 9px 10px;
-      border-radius: 12px;
+      padding: 10px 11px;
+      border-radius: 13px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.05);
-      color: #d2deef;
+      color: #d6e4f2;
       font-size: 12px;
-      line-height: 1.45;
+      line-height: 1.46;
     }
 
     .flags {
@@ -286,121 +327,128 @@
     }
 
     .flag {
-      max-width: 160px;
+      max-width: 164px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      padding: 6px 8px;
+      padding: 6px 9px;
       border-radius: 999px;
+      color: #cbd8e9;
       font-size: 10px;
-      color: #c8d4e6;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(255, 255, 255, 0.04);
     }
 
     .settings-row {
+      position: relative;
+      z-index: 1;
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 12px;
+      align-items: center;
       padding: 12px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .settings-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .settings-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
 
     .settings-copy strong {
       display: block;
       font-size: 13px;
-      color: #f7fbff;
+      color: #f6fbff;
     }
 
     .settings-copy span {
+      display: block;
+      margin-top: 3px;
       font-size: 12px;
-      color: var(--muted);
       line-height: 1.45;
+      color: var(--muted);
     }
 
     .toggle {
       appearance: none;
-      width: 44px;
-      height: 24px;
+      width: 46px;
+      height: 25px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
       position: relative;
+      background: rgba(255, 255, 255, 0.14);
       outline: none;
+      cursor: pointer;
     }
 
     .toggle::after {
       content: "";
-      width: 18px;
-      height: 18px;
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 19px;
+      height: 19px;
       border-radius: 50%;
       background: white;
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      transition: transform 150ms ease;
+      transition: transform 160ms ease;
     }
 
     .toggle:checked {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
     }
 
     .toggle:checked::after {
-      transform: translateX(20px);
+      transform: translateX(21px);
     }
 
-    .license-row,
-    .mode-row {
-      margin-top: 12px;
+    .mode-row,
+    .license-row {
+      position: relative;
+      z-index: 1;
+      margin-top: 13px;
     }
 
     .license-label {
       display: block;
       margin-bottom: 8px;
+      color: var(--muted);
       font-size: 11px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
     }
 
-    .license-wrap,
-    .mode-wrap {
+    .mode-wrap,
+    .license-wrap {
       display: flex;
       gap: 8px;
     }
 
-    .license-wrap input,
-    .mode-wrap select {
+    .mode-wrap select,
+    .license-wrap input {
       min-width: 0;
       flex: 1;
       padding: 12px;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(4, 10, 19, 0.84);
+      background: rgba(5, 11, 20, 0.88);
       color: var(--text);
-      font-family: var(--mono);
-      font-size: 11px;
       outline: none;
     }
 
-    .secondary {
-      padding: 12px 14px;
-      border-radius: 12px;
-      color: #dce7f8;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+    .license-wrap input {
+      font-family: var(--mono);
+      font-size: 11px;
     }
 
     .license-status {
       min-height: 16px;
       margin-top: 8px;
-      font-size: 11px;
       color: var(--muted);
+      font-size: 11px;
     }
 
     .history-list {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -411,23 +459,23 @@
       grid-template-columns: auto 1fr auto;
       gap: 8px;
       align-items: center;
-      padding: 11px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      border-radius: 15px;
       border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
     }
 
     .history-mark {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: var(--accent);
+      background: var(--blue);
     }
 
-    .history-mark.safe { background: var(--safe); }
-    .history-mark.suspicious { background: #facc15; }
-    .history-mark.warning { background: var(--warn); }
-    .history-mark.danger { background: var(--danger); }
+    .history-mark.safe { background: var(--mint); }
+    .history-mark.suspicious { background: #ffd03d; }
+    .history-mark.warning { background: var(--gold); }
+    .history-mark.danger { background: var(--red); }
 
     .history-subject {
       overflow: hidden;
@@ -437,8 +485,8 @@
     }
 
     .history-score {
-      font-family: var(--mono);
       color: var(--muted);
+      font-family: var(--mono);
       font-size: 11px;
     }
 
@@ -448,23 +496,25 @@
       line-height: 1.5;
     }
 
-    .safe { color: #92e1b5; }
-    .warning { color: #ffcf7a; }
-    .danger { color: #ff9f9f; }
+    .safe { color: #93ecbb; }
+    .warning { color: #ffd38a; }
+    .danger { color: #ffacb7; }
   </style>
 </head>
 <body>
   <div class="shell">
-    <div class="header">
-      <div class="logo">
-        <img src="icons/icon48.png" alt="Etherius EmailGuard" />
+    <div class="header-shell">
+      <div class="header">
+        <div class="logo">
+          <img src="icons/icon48.png" alt="Etherius EmailGuard" />
+        </div>
+        <div>
+          <div class="eyebrow">Etherius Security</div>
+          <div class="title">EmailGuard</div>
+          <div class="subtitle">Hybrid AI inbox defense for phishing, fake internships, recruiter scams, and course-selling traps.</div>
+        </div>
+        <div class="status" id="engineStatus">Online</div>
       </div>
-      <div>
-        <div class="eyebrow">Etherius Security</div>
-        <div class="title">EmailGuard</div>
-        <div class="subtitle">Hybrid inbox defense with local AI decisioning</div>
-      </div>
-      <div class="status" id="engineStatus">Online</div>
     </div>
 
     <div class="stats">
@@ -483,28 +533,28 @@
     </div>
 
     <div class="card">
-      <div class="section-title">Current Email</div>
+      <div class="section-title">Threat Island</div>
       <div class="scan-row">
-        <button class="primary" id="scanButton" type="button">Deep Scan Current Email</button>
+        <button class="primary" id="scanButton" type="button">Scan Current Email</button>
         <div class="mode-pill" id="scanModePill">Balanced</div>
       </div>
-      <div class="hint">Open Gmail or Outlook, select an email, and let EmailGuard inspect sender signals, links, scam keywords, and red-team style fraud patterns.</div>
+      <div class="hint">Built to catch fake internship offers, payment-linked recruitment scams, course-selling bait, suspicious sender tricks, and phishing-style urgency.</div>
       <div class="result" id="result"></div>
     </div>
 
     <div class="card">
-      <div class="section-title">Protection Settings</div>
+      <div class="section-title">Control Layer</div>
       <div class="settings-row">
         <div class="settings-copy">
           <strong>Auto-Scan</strong>
-          <span>Analyze newly opened emails automatically.</span>
+          <span>Analyze each newly opened email automatically.</span>
         </div>
         <input class="toggle" id="autoScanToggle" type="checkbox" />
       </div>
       <div class="settings-row">
         <div class="settings-copy">
           <strong>Local AI Engine</strong>
-          <span>Keep instant local decisioning active even if cloud scan slows down.</span>
+          <span>Keep fast on-device reasoning active even if cloud scan slows down.</span>
         </div>
         <input class="toggle" id="localAiToggle" type="checkbox" />
       </div>
@@ -532,7 +582,7 @@
     <div class="card">
       <div class="section-title">Recent Activity</div>
       <div class="history-list" id="historyList">
-        <div class="empty">No scans yet. Open an email to begin using EmailGuard.</div>
+        <div class="empty">No scans yet. Open Gmail or Outlook and begin using EmailGuard.</div>
       </div>
     </div>
   </div>

@@ -147,7 +147,7 @@ document.getElementById("saveLicenseButton").addEventListener("click", () => {
 
 function setBusy(busy) {
   scanButton.disabled = busy;
-  scanButton.textContent = busy ? "Scanning..." : "Deep Scan Current Email";
+  scanButton.textContent = busy ? "Scanning..." : "Scan Current Email";
 }
 
 function refreshMetrics() {
@@ -158,8 +158,15 @@ function refreshMetrics() {
 }
 
 function updateEngine(state) {
-  const normalized = String(state || "online").replaceAll("-", " ").toUpperCase();
-  engineStatus.textContent = normalized;
+  const labels = {
+    online: "Online",
+    degraded: "Degraded",
+    "local-ai-only": "Local AI",
+    "local-plus-cloud": "Hybrid AI",
+    "cloud-first": "Cloud First"
+  };
+  const normalized = String(state || "online").replaceAll(" / cached", "");
+  engineStatus.textContent = labels[normalized] || normalized.replaceAll("-", " ").toUpperCase();
 }
 
 function updateModeUi(value) {
@@ -187,6 +194,7 @@ function renderResult(result) {
       ${typeof result.score === "number" ? `<span class="result-score">${result.score}/100</span>` : ""}
     </div>
     <p class="result-summary">${escapeHtml(result.summary || "")}</p>
+    ${result.isInternshipScam ? `<div class="verdict">High-priority internship or opportunity scam indicators were detected. Treat this email as untrusted until independently verified.</div>` : ""}
     ${result.verdict ? `<div class="verdict">${escapeHtml(result.verdict)}</div>` : ""}
     ${reasons.length ? `<div class="reason-list">${reasons.map((reason) => `<div class="reason">${escapeHtml(reason)}</div>`).join("")}</div>` : ""}
     ${result.recommendation ? `<div class="hint">${escapeHtml(result.recommendation)}</div>` : ""}

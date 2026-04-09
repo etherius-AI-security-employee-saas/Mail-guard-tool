@@ -2,7 +2,7 @@
 
 Etherius EmailGuard is a Chrome extension built to help users detect suspicious emails before they turn into scams, credential theft, or payment fraud. It is designed for real customer use, with a lightweight inbox-side workflow that scans opened emails inside Gmail and Outlook and surfaces clear risk guidance directly where the user is reading mail.
 
-Current release: `v2.1.0`
+Current release: `v2.2.0`
 
 ## Official links
 
@@ -41,6 +41,8 @@ EmailGuard helps reduce those risks by analyzing the opened message context and 
 - Hybrid AI analysis with local fallback if cloud scan is slow
 - Red-team style link, sender, and domain mismatch scoring
 - Fake internship and offer scam reasoning with clear explanations
+- Course-selling and paid-training bait detection
+- Fake HR and free-mail recruiter heuristics
 - Risk-level output designed for non-technical users
 - Clear phishing and scam guidance directly inside the inbox
 - Local settings storage for simple customer deployment
@@ -148,9 +150,22 @@ If your production API changes, update that value in `background.js`.
 - added a real `settings.html` page
 - replaced broken text encoding with clean readable copy
 - improved popup UX and manual scan feedback
+- upgraded local decision engine for money-request internships and course-selling scams
+- added fake recruiter and suspicious company-claim heuristics
+- added lightweight scan caching for smoother repeated use
 - improved onboarding experience
 - regenerated a cleaner extension icon set
 - cleaned manifest structure for Chrome Manifest V3 compatibility
+
+## New in v2.2.0
+
+- improved fee-based internship and fake opportunity scam scoring
+- added course-selling, certification, and training-purchase detection
+- added fake HR heuristics for recruiter language coming from free-mail senders
+- added claimed-company versus sender-domain mismatch scoring
+- improved popup design into a more premium threat-island layout
+- simplified the icon set with a cleaner MailGuard visual identity
+- added short-term result caching to reduce repeated scan delays
 
 ## New in v2.1.0
 

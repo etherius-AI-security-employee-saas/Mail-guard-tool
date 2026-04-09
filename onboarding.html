@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Etherius EmailGuard</title>
+  <style>
+    :root {
+      --bg: #030814;
+      --panel: rgba(10, 18, 34, 0.94);
+      --border: rgba(84, 160, 255, 0.2);
+      --text: #e6edf8;
+      --muted: #92a5c5;
+      --accent: #3b82f6;
+      --accent2: #39d2c0;
+      --success: #22c55e;
+      --shadow: 0 28px 72px rgba(0, 0, 0, 0.38);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 18px;
+      color: var(--text);
+      font-family: "Segoe UI", "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(57, 210, 192, 0.14), transparent 28%),
+        linear-gradient(180deg, #040915 0%, var(--bg) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+      background-size: 34px 34px;
+      pointer-events: none;
+    }
+
+    .card {
+      position: relative;
+      width: min(880px, 100%);
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(14, 24, 43, 0.96), var(--panel));
+      box-shadow: var(--shadow);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(57, 210, 192, 0.12), transparent 24%),
+        radial-gradient(circle at left center, rgba(59, 130, 246, 0.1), transparent 24%);
+      pointer-events: none;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      padding: 40px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+
+    .brand img {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(59, 130, 246, 0.2);
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      color: #f8fbff;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, #8ec5ff, #6df0de);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      margin: 18px 0 26px;
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .points {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .point {
+      display: flex;
+      gap: 12px;
+      padding: 15px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .point-mark {
+      flex: 0 0 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.14);
+      color: #8ec5ff;
+      font-family: "Consolas", "SFMono-Regular", monospace;
+      font-size: 12px;
+    }
+
+    .point strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #f4f8ff;
+      font-size: 15px;
+    }
+
+    .point span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #2959d7);
+      box-shadow: 0 18px 36px rgba(41, 89, 215, 0.28);
+    }
+
+    .button.secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .side-panel {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .panel-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(6, 12, 24, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .panel-card h2 {
+      margin: 0 0 12px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #9db0cf;
+    }
+
+    .metric {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .metric strong {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 30px;
+      color: #f8fbff;
+    }
+
+    .metric span,
+    .panel-card p,
+    .panel-card li {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .panel-card ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      color: #9de8bf;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 16px rgba(34, 197, 94, 0.45);
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hero">
+      <section>
+        <div class="brand">
+          <img src="icons/icon128.png" alt="Etherius EmailGuard logo" />
+          <div>
+            <div class="eyebrow">Etherius Security</div>
+            <div style="font-size: 20px; font-weight: 700;">EmailGuard</div>
+          </div>
+        </div>
+
+        <h1>Enterprise email defense for <span>real inbox threats.</span></h1>
+        <p class="subtitle">
+          EmailGuard scans suspicious emails directly inside Gmail and Outlook, helping your users spot phishing,
+          fake internship fraud, invoice traps, and sender impersonation before they click.
+        </p>
+
+        <div class="points">
+          <div class="point">
+            <div class="point-mark">01</div>
+            <div>
+              <strong>Automatic inbox scanning</strong>
+              <span>Analyze opened messages with a lightweight extension workflow built for fast review and daily use.</span>
+            </div>
+          </div>
+          <div class="point">
+            <div class="point-mark">02</div>
+            <div>
+              <strong>Fraud-focused detection</strong>
+              <span>Highlights fake internship offers, payment requests, phishing signals, spoofed domains, and urgency patterns.</span>
+            </div>
+          </div>
+          <div class="point">
+            <div class="point-mark">03</div>
+            <div>
+              <strong>Simple customer rollout</strong>
+              <span>Install the extension, save a license key if provided, and start scanning without exposing complex settings.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta">
+          <button id="startButton" class="button primary" type="button">Start Protecting My Inbox</button>
+          <button id="optionsButton" class="button secondary" type="button">Open Extension Settings</button>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <div class="panel-card">
+          <h2>Protection Snapshot</h2>
+          <div class="metric">
+            <strong>24/7</strong>
+            <span>Inbox scanning readiness</span>
+          </div>
+          <p>EmailGuard is optimized for day-to-day user protection without asking customers to manage backend infrastructure.</p>
+          <div class="status-row">
+            <span class="status-dot"></span>
+            <span>Ready to activate auto-scan</span>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h2>Best Use Cases</h2>
+          <ul>
+            <li>Campus and internship scam prevention</li>
+            <li>Invoice and payment redirection detection</li>
+            <li>High-volume inbox review for business users</li>
+            <li>Quick end-user guidance before risky clicks</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="onboarding.js"></script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Etherius EmailGuard Settings</title>
+  <style>
+    :root {
+      --bg: #050914;
+      --panel: rgba(11, 19, 35, 0.94);
+      --border: rgba(84, 160, 255, 0.18);
+      --text: #e8eef8;
+      --muted: #93a8c9;
+      --accent: #3b82f6;
+      --accent2: #39d2c0;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 18px;
+      color: var(--text);
+      font-family: "Segoe UI", "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 24%),
+        linear-gradient(180deg, #040915 0%, var(--bg) 100%);
+    }
+
+    .wrap {
+      width: min(860px, 100%);
+      margin: 0 auto;
+    }
+
+    .header,
+    .card {
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15, 25, 45, 0.94), var(--panel));
+      box-shadow: 0 24px 62px rgba(0, 0, 0, 0.34);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 22px 24px;
+      margin-bottom: 18px;
+    }
+
+    .header img {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 4px 0 0;
+      font-size: 28px;
+    }
+
+    .sub {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #a4b6d4;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .copy strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .copy span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .toggle {
+      appearance: none;
+      width: 50px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .toggle::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      transition: transform 160ms ease;
+    }
+
+    .toggle:checked {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .toggle:checked::after {
+      transform: translateX(22px);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      background: rgba(3, 9, 20, 0.78);
+      color: var(--text);
+      padding: 13px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #2959d7);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status {
+      min-height: 18px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.success { color: #99e3b9; }
+    .status.error { color: #ffaeae; }
+
+    .mono {
+      font-family: "Consolas", "SFMono-Regular", monospace;
+      font-size: 12px;
+      color: #dce8fa;
+    }
+
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      .header { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <img src="icons/icon128.png" alt="Etherius EmailGuard logo" />
+      <div>
+        <div class="eyebrow">Etherius Security</div>
+        <h1>EmailGuard Settings</h1>
+        <div class="sub">Configure how the extension scans inbox content, stores your local license key, and handles auto-analysis for supported mail providers.</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Protection Controls</h2>
+        <div class="row">
+          <div class="copy">
+            <strong>Auto-Scan Emails</strong>
+            <span>Run EmailGuard when users open a message in Gmail or Outlook.</span>
+          </div>
+          <input id="autoScanToggle" class="toggle" type="checkbox" />
+        </div>
+        <div class="row">
+          <div class="copy">
+            <strong>Onboarding Completed</strong>
+            <span>Controls whether the welcome experience is shown after install.</span>
+          </div>
+          <input id="onboardedToggle" class="toggle" type="checkbox" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>License</h2>
+        <label for="licenseInput">Customer License Key</label>
+        <input id="licenseInput" class="mono" type="text" placeholder="ETH-XXXX-XXXX-XXXX" />
+        <div class="button-row">
+          <button id="saveButton" class="primary" type="button">Save Settings</button>
+          <button id="clearButton" class="secondary" type="button">Clear License</button>
+        </div>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Support Notes</h2>
+        <p class="sub" style="margin-top: 0;">
+          EmailGuard stores its scan preferences and history in Chrome local storage. It only activates on supported mail surfaces and is designed for customer-friendly deployment without exposing backend controls to end users.
+        </p>
+        <p class="sub mono">Supported sites: mail.google.com, outlook.live.com, outlook.office.com</p>
+      </div>
+
+      <div class="card">
+        <h2>Usage Guidance</h2>
+        <textarea readonly>1. Install the extension in Chrome.
+2. Save the customer license key if your deployment requires one.
+3. Keep auto-scan enabled for normal users.
+4. Open a message in Gmail or Outlook.
+5. EmailGuard analyzes the message and shows the risk banner in-page.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

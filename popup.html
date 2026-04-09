@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Etherius EmailGuard</title>
+  <style>
+    :root {
+      --bg: #050914;
+      --panel: rgba(12, 20, 36, 0.92);
+      --border: rgba(83, 158, 255, 0.2);
+      --text: #e7edf6;
+      --muted: #8ca0bf;
+      --accent: #3b82f6;
+      --accent-2: #49e4c7;
+      --safe: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --mono: "Consolas", "SFMono-Regular", monospace;
+      --sans: "Segoe UI", "Inter", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      width: 360px;
+      margin: 0;
+      color: var(--text);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top right, rgba(73, 228, 199, 0.16), transparent 38%),
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 42%),
+        linear-gradient(180deg, #060c17 0%, var(--bg) 100%);
+    }
+    .shell { padding: 16px; }
+    .header, .card, .stat {
+      backdrop-filter: blur(14px);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(17, 27, 47, 0.96), rgba(8, 14, 27, 0.96));
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+    }
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(73, 228, 199, 0.22));
+      border: 1px solid rgba(73, 228, 199, 0.24);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+    .logo img {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f7fbff;
+    }
+    .status {
+      margin-left: auto;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(73, 228, 199, 0.24);
+      color: #abefe1;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .stat {
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(11, 19, 35, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .value {
+      margin-top: 6px;
+      font-size: 24px;
+      font-family: var(--mono);
+      color: #f7fbff;
+    }
+    .card {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #a9b8cf;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 0;
+    }
+    .primary {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #2959d7);
+      box-shadow: 0 16px 36px rgba(41, 89, 215, 0.32);
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    .result {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .result.show { display: block; }
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .result-score { font-family: var(--mono); color: var(--muted); }
+    .result-summary {
+      margin: 10px 0 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .flag {
+      max-width: 145px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      color: #c8d4e6;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .settings-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .settings-copy strong {
+      display: block;
+      font-size: 13px;
+      color: #f7fbff;
+    }
+    .settings-copy span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .toggle {
+      appearance: none;
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      position: relative;
+      outline: none;
+    }
+    .toggle::after {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: transform 150ms ease;
+    }
+    .toggle:checked { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .toggle:checked::after { transform: translateX(20px); }
+    .license-row { margin-top: 12px; }
+    .license-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .license-wrap {
+      display: flex;
+      gap: 8px;
+    }
+    .license-wrap input {
+      min-width: 0;
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(4, 10, 19, 0.84);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      outline: none;
+    }
+    .secondary {
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: #dce7f8;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .license-status {
+      min-height: 16px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .history-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .history-mark {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .history-mark.safe { background: var(--safe); }
+    .history-mark.suspicious { background: #facc15; }
+    .history-mark.warning { background: var(--warn); }
+    .history-mark.danger { background: var(--danger); }
+    .history-subject {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+    .history-score {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .empty {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .safe { color: #92e1b5; }
+    .warning { color: #ffcf7a; }
+    .danger { color: #ff9f9f; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="header">
+      <div class="logo">
+        <img src="icons/icon48.png" alt="Etherius EmailGuard" />
+      </div>
+      <div>
+        <div class="eyebrow">Etherius Security</div>
+        <div class="title">EmailGuard</div>
+      </div>
+      <div class="status">Active</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Total Scans</div>
+        <div class="value" id="totalScans">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">History</div>
+        <div class="value" id="historyCount">0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Current Email</div>
+      <button class="primary" id="scanButton" type="button">Scan Current Email</button>
+      <div class="hint">Open Gmail or Outlook, select an email, then run a manual scan. Auto-scan can stay enabled in settings below.</div>
+      <div class="result" id="result"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Settings</div>
+      <div class="settings-row">
+        <div class="settings-copy">
+          <strong>Auto-Scan</strong>
+          <span>Analyze emails automatically when a message opens.</span>
+        </div>
+        <input class="toggle" id="autoScanToggle" type="checkbox" />
+      </div>
+      <div class="license-row">
+        <label class="license-label" for="licenseInput">License Key</label>
+        <div class="license-wrap">
+          <input id="licenseInput" type="text" placeholder="ETH-XXXX-XXXX-XXXX" />
+          <button class="secondary" id="saveLicenseButton" type="button">Save</button>
+        </div>
+        <div class="license-status" id="licenseStatus"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Recent Activity</div>
+      <div class="history-list" id="historyList">
+        <div class="empty">No scans yet. Open an email to begin using EmailGuard.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

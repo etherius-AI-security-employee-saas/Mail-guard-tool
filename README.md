@@ -2,6 +2,23 @@
 
 Etherius EmailGuard is a Chrome extension built to help users detect suspicious emails before they turn into scams, credential theft, or payment fraud. It is designed for real customer use, with a lightweight inbox-side workflow that scans opened emails inside Gmail and Outlook and surfaces clear risk guidance directly where the user is reading mail.
 
+## Official links
+
+- Product page: [Etherius MailGuard](https://etherius-security-site.vercel.app/mailguard)
+- Download hub: [Etherius Downloads](https://etherius-security-site.vercel.app/download#mailguard)
+- Etherius organization site: [etherius-security-site.vercel.app](https://etherius-security-site.vercel.app)
+
+## Product snapshot
+
+MailGuard is part of the Etherius security product line and is positioned as a focused inbox-defense layer for:
+
+- phishing detection
+- fake internship and fake offer scams
+- suspicious sender and impersonation patterns
+- urgent payment or credential-harvest emails
+
+It is built to give users readable guidance quickly, directly inside the inbox, without forcing them through a heavy security workflow.
+
 ## Why EmailGuard matters
 
 Modern inbox attacks rarely look like obvious spam anymore. Many campaigns are polished, urgent, and targeted:
@@ -73,6 +90,16 @@ Mail-guard-tool/
 6. Select the `Mail-guard-tool` folder.
 7. Pin the extension in Chrome.
 8. Open Gmail or Outlook and start scanning emails.
+
+### Recommended customer path
+
+If you are presenting this tool as a product:
+
+1. Send customers to the official MailGuard page.
+2. Let them download the extension package from the Etherius download hub.
+3. Ask them to extract the package locally.
+4. Have them load the unpacked extension in Chrome.
+5. Open Gmail or Outlook and begin using EmailGuard.
 
 ### First-time flow
 

@@ -6,112 +6,169 @@
   <title>Etherius EmailGuard</title>
   <style>
     :root {
-      --bg: #050914;
-      --panel: rgba(12, 20, 36, 0.92);
-      --border: rgba(83, 158, 255, 0.2);
-      --text: #e7edf6;
-      --muted: #8ca0bf;
-      --accent: #3b82f6;
-      --accent-2: #49e4c7;
+      --bg: #030711;
+      --panel: rgba(10, 18, 33, 0.9);
+      --panel-2: rgba(13, 24, 44, 0.88);
+      --border: rgba(110, 182, 255, 0.18);
+      --text: #e9f1fb;
+      --muted: #8ca4c4;
+      --accent: #007dff;
+      --accent-2: #00d3ff;
       --safe: #22c55e;
       --warn: #f59e0b;
       --danger: #ef4444;
       --mono: "Consolas", "SFMono-Regular", monospace;
       --sans: "Segoe UI", "Inter", sans-serif;
     }
+
     * { box-sizing: border-box; }
+
     body {
-      width: 360px;
+      width: 394px;
       margin: 0;
       color: var(--text);
       font-family: var(--sans);
       background:
-        radial-gradient(circle at top right, rgba(73, 228, 199, 0.16), transparent 38%),
-        radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 42%),
-        linear-gradient(180deg, #060c17 0%, var(--bg) 100%);
+        radial-gradient(circle at top left, rgba(0, 125, 255, 0.2), transparent 34%),
+        radial-gradient(circle at top right, rgba(0, 211, 255, 0.14), transparent 28%),
+        linear-gradient(180deg, #050914 0%, var(--bg) 100%);
     }
-    .shell { padding: 16px; }
-    .header, .card, .stat {
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image:
+        linear-gradient(rgba(154, 197, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(154, 197, 255, 0.09) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .shell {
+      position: relative;
+      padding: 16px;
+    }
+
+    .header,
+    .card,
+    .stat {
       backdrop-filter: blur(14px);
     }
+
     .header {
+      position: relative;
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px;
+      padding: 16px;
+      border-radius: 20px;
       border: 1px solid var(--border);
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(17, 27, 47, 0.96), rgba(8, 14, 27, 0.96));
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+      background: linear-gradient(180deg, rgba(15, 25, 46, 0.96), rgba(7, 12, 23, 0.96));
+      box-shadow: 0 22px 52px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
     }
+
+    .header::after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      right: -50px;
+      top: -70px;
+      border-radius: 50%;
+      background: rgba(0, 211, 255, 0.12);
+      filter: blur(18px);
+    }
+
     .logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(73, 228, 199, 0.22));
-      border: 1px solid rgba(73, 228, 199, 0.24);
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(0, 125, 255, 0.22), rgba(0, 211, 255, 0.22));
+      border: 1px solid rgba(164, 224, 255, 0.24);
       display: grid;
       place-items: center;
       overflow: hidden;
       flex: 0 0 auto;
+      box-shadow: 0 0 24px rgba(0, 211, 255, 0.14);
     }
+
     .logo img {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       display: block;
     }
+
     .eyebrow {
       font-size: 10px;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--muted);
     }
+
     .title {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
       color: #f7fbff;
+      margin-top: 2px;
     }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #a9b8cf;
+    }
+
     .status {
       margin-left: auto;
-      padding: 6px 10px;
+      padding: 7px 11px;
       border-radius: 999px;
-      border: 1px solid rgba(73, 228, 199, 0.24);
-      color: #abefe1;
+      border: 1px solid rgba(0, 211, 255, 0.2);
+      color: #baf7eb;
       font-size: 10px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
+      background: rgba(10, 27, 32, 0.42);
     }
+
     .stats {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin-top: 14px;
     }
+
     .stat {
       padding: 12px;
       border-radius: 16px;
-      background: rgba(11, 19, 35, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(11, 20, 37, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     .label {
       font-size: 10px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
     }
+
     .value {
       margin-top: 6px;
-      font-size: 24px;
+      font-size: 22px;
       font-family: var(--mono);
       color: #f7fbff;
     }
+
     .card {
       margin-top: 14px;
-      padding: 14px;
+      padding: 15px;
       border-radius: 18px;
       border: 1px solid var(--border);
-      background: var(--panel);
+      background: linear-gradient(180deg, var(--panel), rgba(8, 14, 27, 0.96));
     }
+
     .section-title {
       margin: 0 0 12px;
       font-size: 12px;
@@ -119,35 +176,60 @@
       text-transform: uppercase;
       color: #a9b8cf;
     }
+
     button {
       font: inherit;
       cursor: pointer;
       border: 0;
     }
+
+    .scan-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
     .primary {
       width: 100%;
       padding: 13px 14px;
       border-radius: 14px;
       color: white;
       font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), #2959d7);
-      box-shadow: 0 16px 36px rgba(41, 89, 215, 0.32);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 16px 36px rgba(0, 111, 243, 0.28);
     }
+
+    .mode-pill {
+      padding: 12px 13px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 11px;
+      color: #d7e7fb;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+
     .hint {
       margin-top: 10px;
       font-size: 12px;
-      line-height: 1.5;
+      line-height: 1.55;
       color: var(--muted);
     }
+
     .result {
       display: none;
       margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
+      padding: 14px;
+      border-radius: 16px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .result.show { display: block; }
+
     .result-head {
       display: flex;
       justify-content: space-between;
@@ -157,31 +239,65 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
     }
-    .result-score { font-family: var(--mono); color: var(--muted); }
+
+    .result-score {
+      font-family: var(--mono);
+      color: var(--muted);
+    }
+
     .result-summary {
       margin: 10px 0 0;
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.58;
       color: var(--text);
     }
+
+    .verdict {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #c7d6ea;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .reason-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .reason {
+      padding: 9px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #d2deef;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .flags {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 10px;
     }
+
     .flag {
-      max-width: 145px;
+      max-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      padding: 5px 8px;
+      padding: 6px 8px;
       border-radius: 999px;
       font-size: 10px;
       color: #c8d4e6;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(255, 255, 255, 0.04);
     }
+
     .settings-row {
       display: flex;
       align-items: center;
@@ -190,16 +306,21 @@
       padding: 12px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .settings-row:last-child { border-bottom: 0; padding-bottom: 0; }
+
     .settings-copy strong {
       display: block;
       font-size: 13px;
       color: #f7fbff;
     }
+
     .settings-copy span {
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.45;
     }
+
     .toggle {
       appearance: none;
       width: 44px;
@@ -209,6 +330,7 @@
       position: relative;
       outline: none;
     }
+
     .toggle::after {
       content: "";
       width: 18px;
@@ -220,9 +342,20 @@
       left: 3px;
       transition: transform 150ms ease;
     }
-    .toggle:checked { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
-    .toggle:checked::after { transform: translateX(20px); }
-    .license-row { margin-top: 12px; }
+
+    .toggle:checked {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .toggle:checked::after {
+      transform: translateX(20px);
+    }
+
+    .license-row,
+    .mode-row {
+      margin-top: 12px;
+    }
+
     .license-label {
       display: block;
       margin-bottom: 8px;
@@ -231,11 +364,15 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-    .license-wrap {
+
+    .license-wrap,
+    .mode-wrap {
       display: flex;
       gap: 8px;
     }
-    .license-wrap input {
+
+    .license-wrap input,
+    .mode-wrap select {
       min-width: 0;
       flex: 1;
       padding: 12px;
@@ -247,6 +384,7 @@
       font-size: 11px;
       outline: none;
     }
+
     .secondary {
       padding: 12px 14px;
       border-radius: 12px;
@@ -254,53 +392,62 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .license-status {
       min-height: 16px;
       margin-top: 8px;
       font-size: 11px;
       color: var(--muted);
     }
+
     .history-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
+
     .history-item {
       display: grid;
       grid-template-columns: auto 1fr auto;
       gap: 8px;
       align-items: center;
-      padding: 10px;
+      padding: 11px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
+
     .history-mark {
       width: 10px;
       height: 10px;
       border-radius: 50%;
       background: var(--accent);
     }
+
     .history-mark.safe { background: var(--safe); }
     .history-mark.suspicious { background: #facc15; }
     .history-mark.warning { background: var(--warn); }
     .history-mark.danger { background: var(--danger); }
+
     .history-subject {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       font-size: 12px;
     }
+
     .history-score {
       font-family: var(--mono);
       color: var(--muted);
       font-size: 11px;
     }
+
     .empty {
       color: var(--muted);
       font-size: 12px;
       line-height: 1.5;
     }
+
     .safe { color: #92e1b5; }
     .warning { color: #ffcf7a; }
     .danger { color: #ff9f9f; }
@@ -315,36 +462,62 @@
       <div>
         <div class="eyebrow">Etherius Security</div>
         <div class="title">EmailGuard</div>
+        <div class="subtitle">Hybrid inbox defense with local AI decisioning</div>
       </div>
-      <div class="status">Active</div>
+      <div class="status" id="engineStatus">Online</div>
     </div>
 
     <div class="stats">
       <div class="stat">
-        <div class="label">Total Scans</div>
+        <div class="label">Scans</div>
         <div class="value" id="totalScans">0</div>
       </div>
       <div class="stat">
         <div class="label">History</div>
         <div class="value" id="historyCount">0</div>
       </div>
+      <div class="stat">
+        <div class="label">Mode</div>
+        <div class="value" id="modeStat">BAL</div>
+      </div>
     </div>
 
     <div class="card">
       <div class="section-title">Current Email</div>
-      <button class="primary" id="scanButton" type="button">Scan Current Email</button>
-      <div class="hint">Open Gmail or Outlook, select an email, then run a manual scan. Auto-scan can stay enabled in settings below.</div>
+      <div class="scan-row">
+        <button class="primary" id="scanButton" type="button">Deep Scan Current Email</button>
+        <div class="mode-pill" id="scanModePill">Balanced</div>
+      </div>
+      <div class="hint">Open Gmail or Outlook, select an email, and let EmailGuard inspect sender signals, links, scam keywords, and red-team style fraud patterns.</div>
       <div class="result" id="result"></div>
     </div>
 
     <div class="card">
-      <div class="section-title">Settings</div>
+      <div class="section-title">Protection Settings</div>
       <div class="settings-row">
         <div class="settings-copy">
           <strong>Auto-Scan</strong>
-          <span>Analyze emails automatically when a message opens.</span>
+          <span>Analyze newly opened emails automatically.</span>
         </div>
         <input class="toggle" id="autoScanToggle" type="checkbox" />
+      </div>
+      <div class="settings-row">
+        <div class="settings-copy">
+          <strong>Local AI Engine</strong>
+          <span>Keep instant local decisioning active even if cloud scan slows down.</span>
+        </div>
+        <input class="toggle" id="localAiToggle" type="checkbox" />
+      </div>
+      <div class="mode-row">
+        <label class="license-label" for="modeSelect">Protection Mode</label>
+        <div class="mode-wrap">
+          <select id="modeSelect">
+            <option value="balanced">Balanced</option>
+            <option value="strict">Strict</option>
+            <option value="relaxed">Relaxed</option>
+          </select>
+          <button class="secondary" id="saveModeButton" type="button">Save</button>
+        </div>
       </div>
       <div class="license-row">
         <label class="license-label" for="licenseInput">License Key</label>

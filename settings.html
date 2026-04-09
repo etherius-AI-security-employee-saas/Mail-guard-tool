@@ -246,6 +246,13 @@
         </div>
         <div class="row">
           <div class="copy">
+            <strong>Local AI Engine</strong>
+            <span>Keep local decisioning active for fast phishing and scam detection even when cloud checks are slow.</span>
+          </div>
+          <input id="localAiToggle" class="toggle" type="checkbox" />
+        </div>
+        <div class="row">
+          <div class="copy">
             <strong>Onboarding Completed</strong>
             <span>Controls whether the welcome experience is shown after install.</span>
           </div>
@@ -255,6 +262,15 @@
 
       <div class="card">
         <h2>License</h2>
+        <label for="modeSelect">Protection Mode</label>
+        <select id="modeSelect">
+          <option value="balanced">Balanced</option>
+          <option value="strict">Strict</option>
+          <option value="relaxed">Relaxed</option>
+        </select>
+        <div class="button-row">
+          <button id="saveModeButton" class="secondary" type="button">Save Mode</button>
+        </div>
         <label for="licenseInput">Customer License Key</label>
         <input id="licenseInput" class="mono" type="text" placeholder="ETH-XXXX-XXXX-XXXX" />
         <div class="button-row">

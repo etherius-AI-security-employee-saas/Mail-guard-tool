@@ -1,11 +1,16 @@
 const resultEl = document.getElementById("result");
 const scanButton = document.getElementById("scanButton");
 const autoScanToggle = document.getElementById("autoScanToggle");
+const localAiToggle = document.getElementById("localAiToggle");
+const modeSelect = document.getElementById("modeSelect");
+const modeStat = document.getElementById("modeStat");
+const scanModePill = document.getElementById("scanModePill");
 const licenseInput = document.getElementById("licenseInput");
 const licenseStatus = document.getElementById("licenseStatus");
 const historyList = document.getElementById("historyList");
 const totalScans = document.getElementById("totalScans");
 const historyCount = document.getElementById("historyCount");
+const engineStatus = document.getElementById("engineStatus");
 
 const RISK = {
   safe: { label: "SAFE", className: "safe" },
@@ -17,8 +22,11 @@ const RISK = {
   limit: { label: "LIMIT", className: "warning" }
 };
 
-chrome.storage.local.get(["autoScan", "licenseKey", "scanCount", "history"], (data) => {
+chrome.storage.local.get(["autoScan", "licenseKey", "scanCount", "history", "protectionMode", "localAiEnabled"], (data) => {
   autoScanToggle.checked = data.autoScan !== false;
+  localAiToggle.checked = data.localAiEnabled !== false;
+  modeSelect.value = data.protectionMode || "balanced";
+  updateModeUi(modeSelect.value);
   licenseInput.value = data.licenseKey || "";
   totalScans.textContent = data.scanCount || 0;
   renderHistory(data.history || []);
@@ -37,17 +45,18 @@ scanButton.addEventListener("click", async () => {
       riskLevel: "error",
       summary: "Open Gmail or Outlook, then select an email before running EmailGuard.",
       flags: [],
+      reasons: [],
       recommendation: ""
     });
     return;
   }
 
-  scanButton.disabled = true;
-  scanButton.textContent = "Analyzing...";
+  setBusy(true);
   renderResult({
     riskLevel: "loading",
-    summary: "EmailGuard is analyzing the currently opened message.",
+    summary: "Deep scanning this email with the local AI engine and cloud verification.",
     flags: [],
+    reasons: [],
     recommendation: ""
   });
 
@@ -55,9 +64,10 @@ scanButton.addEventListener("click", async () => {
     const response = await chrome.tabs.sendMessage(tab.id, { type: "MANUAL_SCAN" });
     if (response?.result) {
       renderResult(response.result);
+      updateEngine(response.result.engineStatus || "online");
     }
     refreshMetrics();
-  } catch (error) {
+  } catch (_error) {
     try {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
       await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
@@ -66,6 +76,7 @@ scanButton.addEventListener("click", async () => {
           const retryResponse = await chrome.tabs.sendMessage(tab.id, { type: "MANUAL_SCAN" });
           if (retryResponse?.result) {
             renderResult(retryResponse.result);
+            updateEngine(retryResponse.result.engineStatus || "online");
           }
           refreshMetrics();
         } catch (_retryError) {
@@ -73,24 +84,28 @@ scanButton.addEventListener("click", async () => {
             riskLevel: "error",
             summary: "EmailGuard could not attach to this mail tab. Reload the page and try again.",
             flags: [],
+            reasons: [],
             recommendation: ""
           });
+          updateEngine("degraded");
+        } finally {
+          setBusy(false);
         }
-      }, 500);
-    } catch (secondError) {
+      }, 450);
+      return;
+    } catch (_secondError) {
       renderResult({
         riskLevel: "error",
         summary: "EmailGuard could not attach to this mail tab. Reload the page and try again.",
         flags: [],
+        reasons: [],
         recommendation: ""
       });
+      updateEngine("degraded");
     }
   }
 
-  setTimeout(() => {
-    scanButton.disabled = false;
-    scanButton.textContent = "Scan Current Email";
-  }, 4000);
+  setBusy(false);
 });
 
 autoScanToggle.addEventListener("change", () => {
@@ -103,6 +118,25 @@ autoScanToggle.addEventListener("change", () => {
   });
 });
 
+localAiToggle.addEventListener("change", () => {
+  chrome.storage.local.set({ localAiEnabled: localAiToggle.checked }, () => {
+    licenseStatus.textContent = localAiToggle.checked
+      ? "Local AI decision engine enabled."
+      : "Local AI decision engine disabled.";
+    licenseStatus.className = "license-status";
+    updateEngine(localAiToggle.checked ? "online" : "cloud-first");
+  });
+});
+
+document.getElementById("saveModeButton").addEventListener("click", () => {
+  const value = modeSelect.value;
+  chrome.storage.local.set({ protectionMode: value }, () => {
+    updateModeUi(value);
+    licenseStatus.textContent = `Protection mode saved: ${toLabel(value)}.`;
+    licenseStatus.className = "license-status";
+  });
+});
+
 document.getElementById("saveLicenseButton").addEventListener("click", () => {
   const key = licenseInput.value.trim();
   chrome.storage.local.set({ licenseKey: key }, () => {
@@ -111,6 +145,11 @@ document.getElementById("saveLicenseButton").addEventListener("click", () => {
   });
 });
 
+function setBusy(busy) {
+  scanButton.disabled = busy;
+  scanButton.textContent = busy ? "Scanning..." : "Deep Scan Current Email";
+}
+
 function refreshMetrics() {
   chrome.storage.local.get(["scanCount", "history"], (data) => {
     totalScans.textContent = data.scanCount || 0;
@@ -118,9 +157,29 @@ function refreshMetrics() {
   });
 }
 
+function updateEngine(state) {
+  const normalized = String(state || "online").replaceAll("-", " ").toUpperCase();
+  engineStatus.textContent = normalized;
+}
+
+function updateModeUi(value) {
+  const compact = {
+    strict: "STR",
+    balanced: "BAL",
+    relaxed: "RLX"
+  };
+  modeStat.textContent = compact[value] || "BAL";
+  scanModePill.textContent = toLabel(value);
+}
+
+function toLabel(value) {
+  return String(value || "balanced").charAt(0).toUpperCase() + String(value || "balanced").slice(1);
+}
+
 function renderResult(result) {
   const ui = RISK[result.riskLevel] || RISK.suspicious;
   const flags = Array.isArray(result.flags) ? result.flags.slice(0, 4) : [];
+  const reasons = Array.isArray(result.reasons) ? result.reasons.slice(0, 3) : [];
   resultEl.className = "result show";
   resultEl.innerHTML = `
     <div class="result-head">
@@ -128,6 +187,8 @@ function renderResult(result) {
       ${typeof result.score === "number" ? `<span class="result-score">${result.score}/100</span>` : ""}
     </div>
     <p class="result-summary">${escapeHtml(result.summary || "")}</p>
+    ${result.verdict ? `<div class="verdict">${escapeHtml(result.verdict)}</div>` : ""}
+    ${reasons.length ? `<div class="reason-list">${reasons.map((reason) => `<div class="reason">${escapeHtml(reason)}</div>`).join("")}</div>` : ""}
     ${result.recommendation ? `<div class="hint">${escapeHtml(result.recommendation)}</div>` : ""}
     ${flags.length ? `<div class="flags">${flags.map((flag) => `<span class="flag">${escapeHtml(typeof flag === "string" ? flag : flag.detail || "")}</span>`).join("")}</div>` : ""}
   `;

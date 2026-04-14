@@ -2,13 +2,16 @@
 
 Etherius EmailGuard is a Chrome extension built to help users detect suspicious emails before they turn into scams, credential theft, or payment fraud. It is designed for real customer use, with a lightweight inbox-side workflow that scans opened emails inside Gmail and Outlook and surfaces clear risk guidance directly where the user is reading mail.
 
-Current release: `v2.2.0`
+Current release: `v2.6.2`
 
 ## Official links
 
 - Product page: [Etherius MailGuard](https://etherius-security-site.vercel.app/mailguard)
 - Download hub: [Etherius Downloads](https://etherius-security-site.vercel.app/download#mailguard)
 - Etherius organization site: [etherius-security-site.vercel.app](https://etherius-security-site.vercel.app)
+
+Production domain note:
+Custom `.com` domains are not free. Current production runs on Vercel with a stable HTTPS URL until a purchased custom domain is attached.
 
 ## Product snapshot
 
@@ -39,6 +42,9 @@ EmailGuard helps reduce those risks by analyzing the opened message context and 
 - Fast manual scan from the extension popup
 - Automatic scan support when a new email is opened
 - Hybrid AI analysis with local fallback if cloud scan is slow
+- Deep web research pipeline that attempts 10+ sources per sender/domain analysis
+- Trusted-organization calibration to reduce false positives on legitimate enterprise mail
+- Clear-answer verdict output: likely legitimate, likely risky/fake, or manual verification required
 - Red-team style link, sender, and domain mismatch scoring
 - Fake internship and offer scam reasoning with clear explanations
 - Course-selling and paid-training bait detection
